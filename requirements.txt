@@ -4,3 +4,7 @@ torch
 transformers
 diffusers
 accelerate
+pymatgen
+joblib
+scikit-learn
+ase
