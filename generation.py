@@ -6,7 +6,12 @@ def generate_flow_matching(model, x_0, elements, y, spg, device: str = "cuda"):
     model.to(device)
 
     xt = x_0
-    xt, elements, y, spg = xt.to(device), elements.to(device), y.to(device), spg.to(device)
+    xt, elements, y, spg = (
+        xt.to(device),
+        elements.to(device),
+        y.to(device),
+        spg.to(device),
+    )
 
     eps = 1e-8
     n_steps = 100
@@ -15,14 +20,8 @@ def generate_flow_matching(model, x_0, elements, y, spg, device: str = "cuda"):
     for i in range(1, len(t)):
         with torch.no_grad():
             t_prev = t[i - 1].unsqueeze(0)
+            f_eval = model(xt, timesteps=t_prev, y=y, elements=elements, spg=spg)
 
-            f_eval = model(
-                xt,
-                timesteps=t_prev,
-                y=y,
-                elements=elements,
-                spg=spg
-            )
         x = xt + (t[i] - t[i - 1]) * f_eval
         xt = x
 

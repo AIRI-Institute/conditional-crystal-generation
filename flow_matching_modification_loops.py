@@ -3,8 +3,8 @@ import torch
 from accelerate import Accelerator
 from tqdm import tqdm
 
-from losses import flow_matching_loss
 from generation import generate_flow_matching
+from losses import flow_matching_loss
 
 
 def train_epoch(
@@ -26,13 +26,15 @@ def train_epoch(
     model.train()
     for batch in tqdm(train_dataloader):
         with accelerator.accumulate(model):
-            x_1_coords = batch["coordinates_with_lattice"]
+            x_0_coords = batch["x0_coordinates_with_lattice"]
+            x_1_coords = batch["x1_coordinates_with_lattice"]
             element_matrix = batch["element_matrix"]
             elemental_property_matrix = batch["elemental_property_matrix"]
             spg = batch["spg"]
             condition = batch["energy"]
             n_sites = batch["n_sites"]
             (
+                x_0_coords,
                 x_1_coords,
                 element_matrix,
                 elemental_property_matrix,
@@ -40,6 +42,7 @@ def train_epoch(
                 condition,
                 n_sites,
             ) = (
+                x_0_coords.to(device),
                 x_1_coords.to(device),
                 element_matrix.to(device),
                 elemental_property_matrix.to(device),
@@ -50,8 +53,7 @@ def train_epoch(
 
             elements = torch.cat([element_matrix, elemental_property_matrix], dim=-1)
 
-            # Noise x_0 and time t
-            x_0_coords = torch.randn_like(x_1_coords).to(x_1_coords.device)
+            # time t
             t = torch.rand(x_1_coords.shape[0]).to(device)
 
             optimizer.zero_grad()
@@ -99,13 +101,15 @@ def eval_epoch(
 
     model.eval()
     for batch in tqdm(eval_dataloader):
-        x_1_coords = batch["coordinates_with_lattice"]
+        x_0_coords = batch["x0_coordinates_with_lattice"]
+        x_1_coords = batch["x1_coordinates_with_lattice"]
         element_matrix = batch["element_matrix"]
         elemental_property_matrix = batch["elemental_property_matrix"]
         spg = batch["spg"]
         condition = batch["energy"]
         n_sites = batch["n_sites"]
         (
+            x_0_coords,
             x_1_coords,
             element_matrix,
             elemental_property_matrix,
@@ -113,6 +117,7 @@ def eval_epoch(
             condition,
             n_sites,
         ) = (
+            x_0_coords.to(device),
             x_1_coords.to(device),
             element_matrix.to(device),
             elemental_property_matrix.to(device),
@@ -122,8 +127,6 @@ def eval_epoch(
         )
 
         elements = torch.cat([element_matrix, elemental_property_matrix], dim=-1)
-        # Noise x_0
-        x_0_coords = torch.randn_like(x_1_coords).to(x_1_coords.device)
 
         x_1_gen = generate_flow_matching(
             model=model,

@@ -5,8 +5,7 @@ import numpy as np
 import torch
 
 
-def seed_everything(seed: int,
-                    use_deterministic_algos: bool = False) -> None:
+def seed_everything(seed: int, use_deterministic_algos: bool = False) -> None:
     os.environ["PYTHONHASHSEED"] = str(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
