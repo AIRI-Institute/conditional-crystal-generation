@@ -1,11 +1,11 @@
 import torch
 
 
-def generate_flow_matching(model, x0, elements, y, spg, device: str = "cuda"):
+def generate_flow_matching(model, x_0, elements, y, spg, device: str = "cuda"):
     model.eval()
     model.to(device)
 
-    xt = x0
+    xt = x_0
     xt, elements, y, spg = xt.to(device), elements.to(device), y.to(device), spg.to(device)
 
     eps = 1e-8

@@ -31,4 +31,4 @@ def flow_matching_loss(
     lattice_loss = l1_loss(lattice_truth.cpu(), lattice_pred.cpu(), lattice_size)
     loss = coords_loss_coef * coords_loss + lattice_loss_coef * lattice_loss
     
-    return loss
+    return coords_loss, lattice_loss, loss
