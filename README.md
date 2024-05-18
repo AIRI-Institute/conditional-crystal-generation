@@ -18,3 +18,6 @@
 
 ## Other
 7. utils.py
+
+# Acknowledgement
+1. Our model is base on UNet form the [Improved Diffusion Repository](https://github.com/openai/improved-diffusion)
