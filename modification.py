@@ -26,3 +26,26 @@ def modify_flow_matching(model, x0, elements, y, spg, device: str = "cuda"):
         xt = x
 
     return xt
+
+
+def modify_regressor(model, x0, elements, y, spg, device: str = "cuda"):
+    model.eval()
+    model.to(device)
+
+    x0, elements, y, spg = (
+        x0.to(device),
+        elements.to(device),
+        y.to(device),
+        spg.to(device),
+    )
+    with torch.no_grad():
+        output = model(
+            x0,
+            elements=elements,
+            y=y,
+            spg=spg,
+        )
+
+        output = output.cpu()
+
+    return output
