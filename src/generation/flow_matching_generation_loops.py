@@ -17,6 +17,7 @@ def train_epoch(
     train_dataloader: torch.utils.data.DataLoader,
     scheduler,
     accelerator: Accelerator,
+    noise_func = torch.randn, 
     lattice_size: int = 3,
     device: str = "cuda",
 ):
@@ -52,7 +53,7 @@ def train_epoch(
             elements = torch.cat([element_matrix, elemental_property_matrix], dim=-1)
 
             # Noise x_0 and time t
-            x_0_coords = torch.randn_like(x_1_coords).to(x_1_coords.device)
+            x_0_coords = noise_func(x_1_coords).to(x_1_coords.device)
             t = torch.rand(x_1_coords.shape[0]).to(device)
 
             optimizer.zero_grad()
@@ -89,6 +90,7 @@ def eval_epoch(
     loss_function,
     comparator: PymatgenComparator,
     eval_dataloader: torch.utils.data.DataLoader,
+    noise_func = torch.randn,
     lattice_size: int = 3,
     device: str = "cuda",
 ):
@@ -124,7 +126,7 @@ def eval_epoch(
 
         elements = torch.cat([element_matrix, elemental_property_matrix], dim=-1)
         # Noise x_0
-        x_0_coords = torch.randn_like(x_1_coords).to(x_1_coords.device)
+        x_0_coords = noise_func(x_1_coords.shape).to(x_1_coords.device)
 
         x_1_gen = generate_flow_matching(
             model=model,
@@ -184,11 +186,19 @@ def train(
     eval_dataloader: torch.utils.data.DataLoader,
     scheduler,
     accelerator: Accelerator,
+    noise_type: str = "normal",
     lattice_size: int = 3,
     device: str = "cuda",
     eval_every_n: int = 5,
 ):
     model.to(device)
+
+    if noise_type == "normal":
+        noise_func = torch.randn
+    elif noise_type == "uniform":
+        noise_func = torch.rand
+    else:
+        raise ValueError("noise_type should either be equal to 'normal' or 'uniform'")
 
     for i in tqdm(range(epochs)):
         train_logs = train_epoch(
@@ -200,6 +210,7 @@ def train(
             train_dataloader,
             scheduler,
             accelerator,
+            noise_func,
             lattice_size,
             device,
         )
@@ -210,6 +221,7 @@ def train(
                 metric_function,
                 comparator,
                 eval_dataloader,
+                noise_func,
                 lattice_size,
                 device,
             )
