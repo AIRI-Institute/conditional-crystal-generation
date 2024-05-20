@@ -40,9 +40,9 @@ def diffsion_generation_loss(
                 y,
                 spg,
                 n_sites,
-                lattice_size,
-                coords_loss_coef,
-                lattice_loss_coef,
+                lattice_size: int = 3,
+                coords_loss_coef: float = 0.5,
+                lattice_loss_coef: float = 0.5,
             ):
     
     output = model(
@@ -79,8 +79,8 @@ def diffsion_modification_loss(
                 elements=elements, 
                 y=y, 
                 spg=spg, 
-                timesteps=t
-                x_0_coords=x_0
+                timesteps=t,
+                x_0=x_0
             )
                 
     coords_loss = l1_loss(noise[:, :-4], output[:, :-4], n_sites)

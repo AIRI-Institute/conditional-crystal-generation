@@ -53,7 +53,7 @@ def modify_regressor(model, x0, elements, y, spg, device: str = "cuda"):
 def modify_diffusion(
         x, 
         model, 
-        x_0_coords,
+        x_0,
         elements, 
         condition, 
         spg, 
@@ -74,7 +74,7 @@ def modify_diffusion(
         with torch.no_grad():
             noise_pred = model(
                 x=model_input, 
-                x_0_coords,
+                x_0=x_0,
                 timesteps=t_batch,
                 spg=spg,
                 y=condition, 

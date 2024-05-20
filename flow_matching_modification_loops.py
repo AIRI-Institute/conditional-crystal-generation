@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from generation import generate_flow_matching
 from losses import flow_matching_loss
+from py_utils.comparator import PymatgenComparator
 
 
 def train_epoch(

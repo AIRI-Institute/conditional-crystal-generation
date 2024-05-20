@@ -73,7 +73,7 @@ class CrystalUNetModel(nn.Module):
         )
         return x
     
-class ModelSPGCondition(nn.Module):
+class CrystalUNetModelX0Condition(nn.Module):
     def __init__(
         self, 
         in_channels,
@@ -82,9 +82,9 @@ class ModelSPGCondition(nn.Module):
         condition_dims,
         model_channels,
         num_res_blocks,
-        attention_resolutions=("16",)
+        attention_resolutions=(1, 2, 4, 8)
     ):
-        super(ModelSPGCondition, self).__init__()
+        super(CrystalUNetModelX0Condition, self).__init__()
     
         self.model = UNetModel(
             in_channels=in_channels, # should be equal to num_features (input features) 
@@ -135,7 +135,6 @@ class ModelSPGCondition(nn.Module):
     
             nn.Linear(256, 256)
         )
-    
 
     def forward(
         self, 
@@ -143,15 +142,15 @@ class ModelSPGCondition(nn.Module):
         elements,
         y, 
         spg, 
-        x_0_coords,
+        x_0,
         timesteps=None
     ):
-        x_0_coords = self.coords_condition(x_0_coords)
+        x_0 = self.coords_condition(x_0)
         spg = self.spg_condition(spg)
         elements = self.element_condition(elements.permute(0, 2, 1))
         x = self.model(
             x=x, 
             timesteps=timesteps,
-            y=torch.cat((y.unsqueeze(dim=-1), spg, elements, x_0_coords), dim=1)
+            y=torch.cat((y.unsqueeze(dim=-1), spg, elements, x_0), dim=1)
         )
         return x

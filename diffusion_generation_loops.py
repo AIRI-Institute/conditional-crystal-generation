@@ -3,7 +3,7 @@ import torch
 from accelerate import Accelerator
 from tqdm import tqdm
 
-from py_utils.loss_and_metrics import PymatgenComparator
+from py_utils.comparator import PymatgenComparator
 from losses import diffsion_generation_loss
 from generation import generate_diffusion
 
@@ -56,10 +56,8 @@ def train_epoch(
 
         noisy_x_1_coords = noise_scheduler.add_noise(x_1_coords, noise, timesteps)
         elements = torch.cat([element_matrix, elemental_property_matrix], dim=-1)
-
         
         with accelerator.accumulate(model):
-            
             coords_loss, lattice_loss, loss = diffsion_generation_loss(
                 model=model,
                 t=timesteps,
@@ -164,12 +162,8 @@ def eval_epoch(
             compares_metrics.append(compares.sum(axis=1) / batch_size)
         
         eval_dict = {
-            "epoch": epoch + 1,
-            
             "val_atomic_euclidean_loss": np.mean(test_atomic_metrics),
-        
             "val_lattice_euclidean_loss": np.mean(test_lattice_metrics),
-            
             "val_metric_default": np.mean(compares_metrics, axis=0)[0],
         }
 

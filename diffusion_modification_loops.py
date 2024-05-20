@@ -3,14 +3,15 @@ import torch
 from accelerate import Accelerator
 from tqdm import tqdm
 
-from py_utils.loss_and_metrics import PymatgenComparator
+from py_utils.comparator import PymatgenComparator
 from losses import diffsion_modification_loss
-from generation import modify_diffusion
+from modification import modify_diffusion
 
 
 def train_epoch(
     model,
     optimizer,
+    loss_function,
     noise_scheduler,
     coords_loss_coef: float,
     lattice_loss_coef: float,
@@ -61,8 +62,7 @@ def train_epoch(
 
         
         with accelerator.accumulate(model):
-            
-            coords_loss, lattice_loss, loss = diffsion_modification_loss(
+            coords_loss, lattice_loss, loss = loss_function(
                 model=model,
                 t=timesteps,
                 noisy_x_1=noisy_x_1_coords,
@@ -141,7 +141,7 @@ def eval_epoch(
             output = modify_diffusion(
                 x=noise, 
                 model=model, 
-                x_0_coords=x_0_coords,
+                x_0=x_0_coords,
                 elements=elements, 
                 condition=condition, 
                 spg=spg, 
@@ -184,7 +184,7 @@ def train(
     model: torch.nn.Module,
     optimizer,
     noise_scheduler,
-    loss_function,
+    loss_function: diffsion_modification_loss,
     metric_function,
     comparator,
     coords_loss_coef: float,
