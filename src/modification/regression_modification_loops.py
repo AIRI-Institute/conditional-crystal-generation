@@ -1,8 +1,7 @@
 import torch
 import tqdm
-from losses import l1_loss, pbc_l1_loss
+from src.losses import l1_loss, pbc_l1_loss
 import numpy as np
-import wandb
 
 
 def train_epoch(
@@ -71,8 +70,8 @@ def train_epoch(
         lattice_loss = lattice_loss_fn(lattice_truth, lattice_pred, lattice_size)
         train_loss = coords_loss_coef * coords_loss + lattice_loss_coef * lattice_loss
 
-        train_atomic_metric = coords_loss
-        train_lattice_metric = lattice_loss
+        train_atomic_metric = metric(coords_pred, coords_truth, n_sites)
+        train_lattice_metric = metric(lattice_pred, lattice_truth, lattice_size)
 
         train_loss.backward()
         optimizer.step()
@@ -152,8 +151,8 @@ def eval_epoch(
                 coords_loss_coef * coords_loss + lattice_loss_coef * lattice_loss
             )
 
-            test_atomic_metric = coords_loss
-            test_lattice_metric = lattice_loss
+            test_atomic_metric = metric(coords_pred, coords_truth, n_sites)
+            test_lattice_metric = metric(lattice_pred, lattice_truth, lattice_size)
 
         batch_size = x_0_coords.shape[0]
         test_losses.append(test_loss.item() / batch_size)
@@ -164,7 +163,6 @@ def eval_epoch(
 
 
 def train(
-    model_name: str,
     model: torch.nn.Module,
     optimizer,
     atomic_loss_fn,
@@ -176,11 +174,9 @@ def train(
     train_dataloader: torch.utils.data.DataLoader,
     test_dataloader: torch.utils.data.DataLoader,
     scheduler,
-    device: str,
+    lattice_size: int = 3,
+    device: str = "cuda",
 ):
-
-    best_val_atomic_euclidean_loss = 1e9
-    best_val_lattice_euclidean_loss = 1e9
 
     for epoch in range(epochs):
         train_losses, train_atomic_metrics, train_lattice_metrics = train_epoch(
@@ -193,6 +189,8 @@ def train(
             lattice_loss_coef,
             train_dataloader,
             scheduler,
+            lattice_size=lattice_size,
+            device=device
         )
         test_losses, test_atomic_metrics, test_lattice_metrics = eval_epoch(
             model,
@@ -202,9 +200,10 @@ def train(
             coords_loss_coef,
             lattice_loss_coef,
             test_dataloader,
+            lattice_size=lattice_size,
+            device=device
         )
-        wandb.log(
-            {
+        print({
                 "epoch": epoch + 1,
                 "train_atomic_euclidean_loss": np.mean(train_atomic_metrics),
                 "val_atomic_euclidean_loss": np.mean(test_atomic_metrics),
@@ -212,18 +211,4 @@ def train(
                 "val_lattice_euclidean_loss": np.mean(test_lattice_metrics),
                 "train_manhattan_loss": np.mean(train_losses),
                 "val_manhattan_loss": np.mean(test_losses),
-            }
-        )
-        if np.mean(test_atomic_metrics) < best_val_atomic_euclidean_loss:
-            best_val_atomic_euclidean_loss = np.mean(test_atomic_metrics)
-            print(
-                f"Epoch {epoch}. \t Saving new best atomic loss : {best_val_atomic_euclidean_loss :.4f}"
-            )
-            torch.save(model.state_dict(), f"{model_name}/best_atomic_model.pth")
-
-        if np.mean(test_lattice_metrics) < best_val_lattice_euclidean_loss:
-            best_val_lattice_euclidean_loss = np.mean(test_lattice_metrics)
-            print(
-                f"Epoch {epoch}. \t Saving new best lattice loss : {best_val_lattice_euclidean_loss :.4f}"
-            )
-            torch.save(model.state_dict(), f"{model_name}/best_lattice_model.pth")
+            })

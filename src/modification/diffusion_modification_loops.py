@@ -3,8 +3,8 @@ import torch
 from accelerate import Accelerator
 from tqdm import tqdm
 
-from py_utils.comparator import PymatgenComparator
-from losses import diffsion_modification_loss
+from src.py_utils.comparator import PymatgenComparator
+from src.losses import diffsion_modification_loss
 from modification import modify_diffusion
 
 
@@ -209,8 +209,8 @@ def train(
             train_dataloader,
             scheduler,
             accelerator,
-            lattice_size,
-            device,
+            lattice_size=lattice_size,
+            device=device,
         )
 
         if i % eval_every_n == 0:
@@ -220,8 +220,8 @@ def train(
                 metric_function,
                 comparator,
                 eval_dataloader,
-                lattice_size,
-                device,
+                lattice_size=lattice_size,
+                device=device,
             )
 
             train_logs.update(eval_logs)

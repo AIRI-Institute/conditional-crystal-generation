@@ -3,9 +3,9 @@ import torch
 from accelerate import Accelerator
 from tqdm import tqdm
 
-from losses import flow_matching_loss
+from src.losses import flow_matching_loss
 from generation import generate_flow_matching
-from py_utils.comparator import PymatgenComparator
+from src.py_utils.comparator import PymatgenComparator
 
 
 def train_epoch(
@@ -188,6 +188,8 @@ def train(
     device: str = "cuda",
     eval_every_n: int = 5,
 ):
+    model.to(device)
+
     for i in tqdm(range(epochs)):
         train_logs = train_epoch(
             model,

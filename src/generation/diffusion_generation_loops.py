@@ -3,8 +3,8 @@ import torch
 from accelerate import Accelerator
 from tqdm import tqdm
 
-from py_utils.comparator import PymatgenComparator
-from losses import diffsion_generation_loss
+from src.py_utils.comparator import PymatgenComparator
+from src.losses import diffsion_generation_loss
 from generation import generate_diffusion
 
 
@@ -12,6 +12,7 @@ def train_epoch(
     model,
     optimizer,
     noise_scheduler,
+    loss_function: diffsion_generation_loss,
     coords_loss_coef: float,
     lattice_loss_coef: float,
     train_dataloader: torch.utils.data.DataLoader,
@@ -58,7 +59,7 @@ def train_epoch(
         elements = torch.cat([element_matrix, elemental_property_matrix], dim=-1)
         
         with accelerator.accumulate(model):
-            coords_loss, lattice_loss, loss = diffsion_generation_loss(
+            coords_loss, lattice_loss, loss = loss_function(
                 model=model,
                 t=timesteps,
                 noise=noise,
@@ -165,6 +166,8 @@ def eval_epoch(
             "val_atomic_euclidean_loss": np.mean(test_atomic_metrics),
             "val_lattice_euclidean_loss": np.mean(test_lattice_metrics),
             "val_metric_default": np.mean(compares_metrics, axis=0)[0],
+            "val_metric_defaultX2": np.mean(compares_metrics, axis=0)[1],
+            "val_metric_defaultX5": np.mean(compares_metrics, axis=0)[2],
         }
 
     return eval_dict
@@ -188,6 +191,8 @@ def train(
     device: str = "cuda",
     eval_every_n: int = 5,
 ):
+    model.to(device)
+
     for i in tqdm(range(epochs)):
         train_logs = train_epoch(
             model,
@@ -199,8 +204,8 @@ def train(
             train_dataloader,
             scheduler,
             accelerator,
-            lattice_size,
-            device,
+            lattice_size=lattice_size,
+            device=device,
         )
 
         if i % eval_every_n == 0:
@@ -210,8 +215,8 @@ def train(
                 metric_function,
                 comparator,
                 eval_dataloader,
-                lattice_size,
-                device,
+                lattice_size=lattice_size,
+                device=device,
             )
 
             train_logs.update(eval_logs)

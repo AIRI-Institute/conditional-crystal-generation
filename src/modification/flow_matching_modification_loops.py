@@ -3,9 +3,9 @@ import torch
 from accelerate import Accelerator
 from tqdm import tqdm
 
-from generation import generate_flow_matching
-from losses import flow_matching_loss
-from py_utils.comparator import PymatgenComparator
+from modification import modify_flow_matching
+from src.losses import flow_matching_loss
+from src.py_utils.comparator import PymatgenComparator
 
 
 def train_epoch(
@@ -129,7 +129,7 @@ def eval_epoch(
 
         elements = torch.cat([element_matrix, elemental_property_matrix], dim=-1)
 
-        x_1_gen = generate_flow_matching(
+        x_1_gen = modify_flow_matching(
             model=model,
             x_0=x_0_coords,
             elements=elements,
