@@ -49,3 +49,38 @@ def generate_regressor(model, x0, elements, y, spg, device: str = "cuda"):
         output = output.cpu()
 
     return output
+
+
+
+def generate_diffusion(
+        x, 
+        model, 
+        elements, 
+        condition, 
+        spg, 
+        noise_scheduler, 
+        num_inference_steps: int = 100
+    ):
+    noise_scheduler.set_timesteps(num_inference_steps=num_inference_steps)
+
+    for i, t in enumerate(noise_scheduler.timesteps):
+        model_input = noise_scheduler.scale_model_input(x, t)
+
+        t_batch = torch.full(
+            size=(x.shape[0],), 
+            fill_value=t.item(), 
+            dtype=torch.long
+        ).cuda()
+
+        with torch.no_grad():
+            noise_pred = model(
+                x=model_input, 
+                timesteps=t_batch,
+                spg=spg,
+                y=condition, 
+                elements=elements, 
+            )
+
+        x = noise_scheduler.step(noise_pred, t, x).prev_sample
+
+    return x

@@ -31,6 +31,65 @@ def flow_matching_loss(
 
     return coords_loss, lattice_loss, loss
 
+def diffsion_generation_loss(
+                model,
+                t,
+                noise,
+                noisy_x_1,
+                elements,
+                y,
+                spg,
+                n_sites,
+                lattice_size,
+                coords_loss_coef,
+                lattice_loss_coef,
+            ):
+    
+    output = model(
+                noisy_x_1, 
+                elements=elements, 
+                y=y, 
+                spg=spg, 
+                timesteps=t
+            )
+                
+    coords_loss = l1_loss(noise[:, :-4], output[:, :-4], n_sites)
+    lattice_loss = l1_loss(noise[:, -3:], output[:, -3:], lattice_size)
+    
+    train_loss = coords_loss_coef * coords_loss + lattice_loss_coef * lattice_loss
+
+    return coords_loss, lattice_loss, train_loss
+
+def diffsion_modification_loss(
+                model,
+                t,
+                noise,
+                noisy_x_1,
+                x_0,
+                elements,
+                y,
+                spg,
+                n_sites,
+                lattice_size,
+                coords_loss_coef,
+                lattice_loss_coef,
+            ):
+    output = model(
+                noisy_x_1, 
+                elements=elements, 
+                y=y, 
+                spg=spg, 
+                timesteps=t
+                x_0_coords=x_0
+            )
+                
+    coords_loss = l1_loss(noise[:, :-4], output[:, :-4], n_sites)
+    lattice_loss = l1_loss(noise[:, -3:], output[:, -3:], lattice_size)
+    
+    train_loss = coords_loss_coef * coords_loss + lattice_loss_coef * lattice_loss
+
+    return coords_loss, lattice_loss, train_loss
+
 
 def l1_loss(
     predicted_features,  # [batch_size, n_sites, 3]
