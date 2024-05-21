@@ -2,6 +2,7 @@ import torch
 import tqdm
 from src.losses import l1_loss, pbc_l1_loss
 import numpy as np
+from src.py_utils.comparator import PymatgenComparator
 
 
 def train_epoch(
@@ -92,12 +93,14 @@ def eval_epoch(
     coords_loss_coef: float,
     lattice_loss_coef: float,
     test_dataloader: torch.utils.data.DataLoader,
+    comparator: PymatgenComparator,
     lattice_size: int = 3,
     device: str = "cuda",
 ):
     test_losses = []
     test_atomic_metrics = []
     test_lattice_metrics = []
+    compares_metrics = []
 
     model.eval()
     for batch in tqdm(test_dataloader):
@@ -152,11 +155,20 @@ def eval_epoch(
             test_lattice_metric = metric(lattice_pred, lattice_truth, lattice_size)
 
         batch_size = x_0_coords.shape[0]
+        compares = comparator.calculate_compares(
+            element_matrix,
+            n_sites,
+            coords_truth,
+            lattice_truth,
+            coords_pred,
+            lattice_pred,
+        )
+        compares_metrics.append(compares.sum(axis=1) / batch_size)
         test_losses.append(test_loss.item() / batch_size)
         test_atomic_metrics.append(test_atomic_metric.item() / batch_size)
         test_lattice_metrics.append(test_lattice_metric.item() / batch_size)
 
-    return test_losses, test_atomic_metrics, test_lattice_metrics
+    return test_losses, test_atomic_metrics, test_lattice_metrics, compares_metrics
 
 
 def train(
@@ -190,7 +202,12 @@ def train(
             lattice_size=lattice_size,
             device=device,
         )
-        test_losses, test_atomic_metrics, test_lattice_metrics = eval_epoch(
+        (
+            test_losses,
+            test_atomic_metrics,
+            test_lattice_metrics,
+            test_compares_metrics,
+        ) = eval_epoch(
             model,
             atomic_loss_fn,
             lattice_loss_fn,
@@ -198,11 +215,13 @@ def train(
             coords_loss_coef,
             lattice_loss_coef,
             test_dataloader,
+            PymatgenComparator(),
             lattice_size=lattice_size,
-            device=device
+            device=device,
         )
 
-        print({
+        print(
+            {
                 "epoch": epoch + 1,
                 "train_atomic_euclidean_loss": np.mean(train_atomic_metrics),
                 "val_atomic_euclidean_loss": np.mean(test_atomic_metrics),
@@ -210,4 +229,6 @@ def train(
                 "val_lattice_euclidean_loss": np.mean(test_lattice_metrics),
                 "train_manhattan_loss": np.mean(train_losses),
                 "val_manhattan_loss": np.mean(test_losses),
-            })
+                "val_metric_default": np.mean(test_compares_metrics),
+            }
+        )
