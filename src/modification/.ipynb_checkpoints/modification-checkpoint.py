@@ -1,7 +1,7 @@
 import torch
 
 
-def generate_flow_matching(model, x_0, elements, y, spg, device: str = "cuda"):
+def modify_flow_matching(model, x_0, elements, y, spg, device: str = "cuda"):
     model.eval()
     model.to(device)
 
@@ -20,15 +20,15 @@ def generate_flow_matching(model, x_0, elements, y, spg, device: str = "cuda"):
     for i in range(1, len(t)):
         with torch.no_grad():
             t_prev = t[i - 1].unsqueeze(0)
-            f_eval = model(xt, timesteps=t_prev, y=y, elements=elements, spg=spg)
 
+            f_eval = model(xt, timesteps=t_prev, y=y, elements=elements, spg=spg)
         x = xt + (t[i] - t[i - 1]) * f_eval
         xt = x
 
     return xt
 
 
-def generate_regressor(model, x0, elements, y, spg, device: str = "cuda"):
+def modify_regressor(model, x0, elements, y, spg, device: str = "cuda"):
     model.eval()
     model.to(device)
 
@@ -50,11 +50,10 @@ def generate_regressor(model, x0, elements, y, spg, device: str = "cuda"):
 
     return output
 
-
-
-def generate_diffusion(
-        x_0,
+def modify_diffusion(
+        x,
         model, 
+        x_0,
         elements, 
         y,
         spg, 
@@ -67,9 +66,10 @@ def generate_diffusion(
 
     noise_scheduler.set_timesteps(num_inference_steps=num_inference_steps)
 
-    xt = x_0
-    xt, elements, y, spg = (
+    xt = x
+    xt, x_0, elements, y, spg = (
         xt.to(device),
+        x_0.to(device),
         elements.to(device),
         y.to(device),
         spg.to(device),
@@ -79,7 +79,7 @@ def generate_diffusion(
         xt = noise_scheduler.scale_model_input(xt, t)
 
         t_batch = torch.full(
-            size=(xt.shape[0],), 
+            size=(x.shape[0],), 
             fill_value=t.item(), 
             dtype=torch.long
         ).cuda()
@@ -87,6 +87,7 @@ def generate_diffusion(
         with torch.no_grad():
             noise_pred = model(
                 x=xt,
+                x_0=x_0,
                 timesteps=t_batch,
                 spg=spg,
                 y=y,
