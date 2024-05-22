@@ -8,3 +8,6 @@ pymatgen==2023.10.11
 joblib==1.2.0
 scikit-learn==1.2.2
 ase==3.22.1
+tqdm==4.65.0
+matplotlib==3.8.0
+seaborn==0.12.2
