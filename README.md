@@ -39,7 +39,7 @@ To pre-optmizer the generated structures, the following notebooks should be exec
 | :----------------: | :-------: | :-------------------: | :--------------------: |
 | 0.8074             | **0.82**  | 0.482                 | 0.8097                 |
 
-## Results on Generation Task
+## Results on Modification Task
 | Ordinary Model | Diffusion   | Flow Matching |
 | :------------: | :---------: | :-----------: |
 | **0.4148**         | 0.3653  | 0.2059        |
