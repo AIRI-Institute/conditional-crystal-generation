@@ -1,8 +1,8 @@
 # conditional-crystal-generation
 
 <p float="left">
-    <img src="images/generation.jpeg" alt="drawing" width="400"/>
-    <img src="images/modification.jpeg" alt="drawing" width="400"/>
+    <img src="images/generation.jpeg" alt="drawing" width="300"/>
+    <img src="images/modification.jpeg" alt="drawing" width="300"/>
 </p>
 
 # Model Archetecture
