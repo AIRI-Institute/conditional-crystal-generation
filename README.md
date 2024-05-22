@@ -4,7 +4,7 @@
 
 Generation            |  Modification
 :---------------------------:|:-------------------------:
-<img src="images/generation.jpg" alt="drawing" width="400"/>|<img src="images/modification.jpg" alt="drawing" width="600"/>
+<img src="images/generation.jpeg" alt="drawing" width="400"/>|<img src="images/modification.jpeg" alt="drawing" width="400"/>
 
 
 
