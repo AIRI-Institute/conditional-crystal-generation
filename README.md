@@ -2,6 +2,12 @@
 
 # Model Archetecture
 
+Generation            |  Modification
+:---------------------------:|:-------------------------:
+<img src="images/generation.jpg" alt="drawing" width="400"/>|<img src="images/modification.jpg" alt="drawing" width="600"/>
+
+
+
 UNet Archetecture            |  Condition Block
 :---------------------------:|:-------------------------:
 <img src="images/UNet_archetecture.jpg" alt="drawing" width="400"/>|<img src="images/condition_block_archetecture.jpg" alt="drawing" width="400"/>
