@@ -17,12 +17,21 @@ pip install -r requirements.txt
 ## Training and Evaluation
 
 To train the models in the paper and get their validaiton results, the following notebooks should be executed:
-* diffusion_generation_inference.ipynb
-* diffusion_generation_train.ipynb
-* diffusion_modification_train.ipynb
-* flow_matching_generation_inference.ipynb
-* flow_matching_generation_train.ipynb
-* flow_matching_modification_train.ipynb
+* notebooks/diffusion_generation_train.ipynb
+* notebooks/diffusion_modification_train.ipynb
+* notebooks/flow_matching_generation_train.ipynb
+* notebooks/flow_matching_modification_train.ipynb
+
+## Inference
+
+To generate structures with trained models, the following notebooks should be executed:
+* notebooks/diffusion_generation_inference.ipynb
+* notebooks/flow_matching_generation_inference.ipynb
+
+## Pre-optimization
+
+To pre-optmizer the generated structures, the following notebooks should be executed:
+* notebooks/pre_optimization.ipynb
 
 
 ## Results on Generation Task
