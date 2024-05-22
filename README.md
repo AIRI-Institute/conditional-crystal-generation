@@ -5,6 +5,18 @@
     <img src="images/modification.jpeg" alt="drawing" width="300"/>
 </p>
 
+
+# Results on Generation Task
+| DDPM               | DDIM      | Flow Matching N(0, 1) |  Flow Matching U(0, 1) |
+| :----------------: | :-------: | :-------------------: | :--------------------: |
+| 0.8074             | **0.82**  | 0.482                 | 0.8097                 |
+
+# Results on Generation Task
+| Ordinary Model | Diffusion   | Flow Matching |
+| :------------: | :---------: | :-----------: |
+| **0.4148**         | 0.3653  | 0.2059        |
+
+
 # Model Archetecture
 
 UNet Archetecture            |  Condition Block
