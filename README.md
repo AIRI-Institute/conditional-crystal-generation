@@ -1,12 +1,11 @@
 # conditional-crystal-generation
 
+<p float="left">
+    <img src="images/generation.jpeg" alt="drawing" width="400"/>
+    <img src="images/modification.jpeg" alt="drawing" width="400"/>
+</p>
+
 # Model Archetecture
-
-Generation            |  Modification
-:---------------------------:|:-------------------------:
-<img src="images/generation.jpeg" alt="drawing" width="400"/>|<img src="images/modification.jpeg" alt="drawing" width="400"/>
-
-
 
 UNet Archetecture            |  Condition Block
 :---------------------------:|:-------------------------:
