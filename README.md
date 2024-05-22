@@ -14,6 +14,17 @@ To install requirements:
 pip install -r requirements.txt
 ```
 
+## Training and Evaluation
+
+To train the models in the paper and get their validaiton results, the following notebooks should be executed:
+* diffusion_generation_inference.ipynb
+* diffusion_generation_train.ipynb
+* diffusion_modification_train.ipynb
+* flow_matching_generation_inference.ipynb
+* flow_matching_generation_train.ipynb
+* flow_matching_modification_train.ipynb
+
+
 ## Results on Generation Task
 | DDPM               | DDIM      | Flow Matching N(0, 1) |  Flow Matching U(0, 1) |
 | :----------------: | :-------: | :-------------------: | :--------------------: |
